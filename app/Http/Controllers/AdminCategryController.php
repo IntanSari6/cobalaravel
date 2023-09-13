@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Http\Request;
 
 class AdminCategryController extends Controller
 {
@@ -14,8 +14,7 @@ class AdminCategryController extends Controller
      */
     public function index()
     {
-        $this->authorize('admin');
-        return view('dashboard.categories.index', [
+        return view('dashboard.categories.index',[
             'categories' => Category::all()
         ]);
     }
@@ -27,7 +26,9 @@ class AdminCategryController extends Controller
      */
     public function create()
     {
-        //
+        return view('dashboard.categories.create', [
+            'categories' => Category::all()
+        ]);
     }
 
     /**
@@ -38,16 +39,23 @@ class AdminCategryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name'=> 'required|max:255',
+            'slug' => 'required|unique:categories'
+        ]);
+
+        Category::create($validatedData);
+
+        return redirect('/dashboard/categories')->with('success', 'New Post has been added!');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Category $category)
     {
         //
     }
@@ -55,33 +63,48 @@ class AdminCategryController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Category $category)
     {
-        //
+
+        return view('dashboard.categories.edit', [
+            'category' => $category,
+            'categories' => Category::all()
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Category $category)
     {
-        //
+        $rules = [
+            'name'=> 'required|max:255',
+        ];
+        if($request->slug != $category->slug){
+            $rules['slug'] = 'required|unique:categories';
+        }
+        $validatedData = $request->validate($rules);
+
+        Category::where('id', $category->id)
+        ->update($validatedData);
+
+        return redirect('/dashboard/categories')->with('success', ' Post has been updated!');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Category $category)
     {
         //
     }
